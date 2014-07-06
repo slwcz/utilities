@@ -1,0 +1,58 @@
+/**
+ * Simple backup utility
+ */
+
+def CONFIG_FILE = "build.properties"
+
+// Load configuration on startup
+file(CONFIG_FILE).withReader { reader ->
+   def configuration = new Properties()
+   configuration.load(reader)
+   for (property in configuration) {
+      project.ext[property.key] = property.value
+   }
+}
+
+// Define tasks dynamically on startup
+project.ext.properties.each { property ->
+   
+   if (!(property.key.endsWith(".from") || property.key.endsWith(".include"))) {
+      def item = property.key
+      task "backup_$item"(type: Zip) {
+         from project.ext["${item}.from"]
+         include project.ext["${item}.include"]
+         destinationDir file("$item")
+         archiveName "${item}.zip"
+
+         doFirst {
+            log "Executing task '$name' ...";
+         }
+         doLast {
+            println " completed."
+         }
+      }
+   }
+}
+
+// Main task which wraps dynamically defined tasks
+task backup {
+   doFirst {
+      log "Backup complete."
+   }
+
+}
+
+backup.dependsOn {
+   tasks.findAll { task -> 
+      task.name.startsWith("backup_") 
+   }
+}
+
+def log(message) {
+   print " ".multiply(3) + message
+}
+
+def logln(message) {
+   println " ".multiply(3) + message
+}
+
