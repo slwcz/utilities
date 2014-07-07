@@ -36,7 +36,7 @@ project.ext.properties.each { property ->
 
 // Main task which wraps dynamically defined tasks
 task backup {
-   doFirst {
+   doLast {
       log "Backup complete."
    }
 
