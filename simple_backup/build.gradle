@@ -3,6 +3,8 @@
  */
 
 def CONFIG_FILE = "build.properties"
+def TARGET_ROOT = "d:\\DOCUMENTS\\04_zalohy"
+def TODAY = new Date().format("yyyy-MM-dd")
 
 // Load configuration on startup
 file(CONFIG_FILE).withReader { reader ->
@@ -18,10 +20,11 @@ project.ext.properties.each { property ->
    
    if (!(property.key.endsWith(".from") || property.key.endsWith(".include"))) {
       def item = property.key
+      def output = property.value
       task "backup_$item"(type: Zip) {
          from project.ext["${item}.from"]
-         include project.ext["${item}.include"]
-         destinationDir file("$item")
+         include project.ext["${item}.include"].tokenize(',')
+         destinationDir file("$TARGET_ROOT\\$output\\$TODAY")
          archiveName "${item}.zip"
 
          doFirst {
@@ -37,6 +40,8 @@ project.ext.properties.each { property ->
 // Main task which wraps dynamically defined tasks
 task backup {
    doLast {
+      file("$TARGET_ROOT").listFiles().findAll {it.name.startsWith("_posledni")}.each { File file -> delete(file) }
+      mkdir("$TARGET_ROOT\\_posledni_synchronizace_$TODAY")
       log "Backup complete."
    }
 
@@ -55,4 +60,3 @@ def log(message) {
 def logln(message) {
    println " ".multiply(3) + message
 }
-
