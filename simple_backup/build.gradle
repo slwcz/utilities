@@ -1,6 +1,7 @@
 /**
  * Simple backup utility
  */
+import org.apache.tools.ant.DirectoryScanner
 
 def CONFIG_FILE = "build.properties"
 def TARGET_ROOT = "d:\\DOCUMENTS\\04_zalohy"
@@ -28,6 +29,8 @@ project.ext.properties.each { property ->
          archiveName "${item}.zip"
 
          doFirst {
+            DirectoryScanner.defaultExcludes.each { DirectoryScanner.removeDefaultExclude it }
+            DirectoryScanner.addDefaultExclude 'something has to be in here or everything gets excluded'
             log "Executing task '$name' ...";
          }
          doLast {
@@ -60,3 +63,4 @@ def log(message) {
 def logln(message) {
    println " ".multiply(3) + message
 }
+ 
