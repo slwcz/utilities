@@ -24,10 +24,16 @@ if (definitions.exists()) {
 			return;
 		}
 		
-		print "Processing ${line}"
-		
+        // Allow specifying a note which will be appended to the name of local file
+        String[] parts = line.split(';', -1)
+        line = parts[0]
+        suffix = parts.length > 1 ? parts[1]: ""
+
+        print suffix ? "Processing $line ($suffix)" : "Processing $line"
+
 		for (def pattern : KNOWN_PATTERNS) {
-			def matcher = line =~  pattern
+
+    		def matcher = line =~  pattern
 			
 			// If current line matches a known pattern
 			if (matcher.size() > 0) {
@@ -36,9 +42,12 @@ if (definitions.exists()) {
 				break
 			}
 		}
-		
-		String target = line.substring(line.lastIndexOf('/') + 1);
-		def targetFile = new File(WORKING_DIR + target);
+
+        suffix = suffix ? "_" + suffix : "";
+        shortFileName = line.substring(line.lastIndexOf('/') + 1)
+		target = shortFileName.substring(0, shortFileName.indexOf('.')) + suffix + shortFileName.substring(shortFileName.indexOf('.'));
+
+        def targetFile = new File(WORKING_DIR + target);
 		
 		if (targetFile.exists()) {
 			targetFile.delete();
