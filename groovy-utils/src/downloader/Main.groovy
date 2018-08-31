@@ -45,7 +45,7 @@ if (definitions.exists()) {
 
         suffix = suffix ? "_" + suffix : "";
         shortFileName = line.substring(line.lastIndexOf('/') + 1)
-		if (shortFileName.indexOf('.') > -1) {
+        if (shortFileName.indexOf('.') > -1) {
             target = shortFileName.substring(0, shortFileName.indexOf('.')) + suffix + shortFileName.substring(shortFileName.indexOf('.'));
         } else {
             target = shortFileName + suffix + ".mp3";
