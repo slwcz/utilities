@@ -7,7 +7,7 @@ final String DEFINITIONS_FILE = "definitions.txt";
 // Replacements
 // Supported format examples: prehravac.rozhlas.cz/audio/3304377
 def KNOWN_PATTERNS = [ ~/prehravac.rozhlas.cz\/audio\/([0-9]+)$/ ]
-def TARGET_PATTERN = "http://media.rozhlas.cz/_audio/<identifier>.mp3"
+def TARGET_PATTERN = "http://media.rozhlas.cz/_download/<identifier>.mp3"
 
 
 // Implementation begin
@@ -41,20 +41,30 @@ if (definitions.exists()) {
 				line = TARGET_PATTERN.replace("<identifier>", identifier);
 				break
 			}
-		}
+        }
 
         suffix = suffix ? "_" + suffix : "";
         shortFileName = line.substring(line.lastIndexOf('/') + 1)
-		target = shortFileName.substring(0, shortFileName.indexOf('.')) + suffix + shortFileName.substring(shortFileName.indexOf('.'));
+		if (shortFileName.indexOf('.') > -1) {
+            target = shortFileName.substring(0, shortFileName.indexOf('.')) + suffix + shortFileName.substring(shortFileName.indexOf('.'));
+        } else {
+            target = shortFileName + suffix + ".mp3";
+        }
 
         def targetFile = new File(WORKING_DIR + target);
 		
 		if (targetFile.exists()) {
 			targetFile.delete();
 		}
-		
-		targetFile << line.toURL().openStream();
-		
+
+        HttpURLConnection connection = line.toURL().openConnection();
+        if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+            println " ... returning HTTP " + connection.getResponseCode() + " " + connection.getResponseMessage();
+            throw new IOException()
+        }
+
+        targetFile << line.toURL().openStream();
+
 		println " ... downloaded to ${targetFile}"
 		idx++;
 	}
